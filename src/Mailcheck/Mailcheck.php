@@ -136,7 +136,7 @@ class Mailcheck   {
 		$closestTld = $this->findClosest($emailParts->tld, $this->popularTlds);
 		if ($closestTld and $closestTld != $emailParts->tld) {
 			// The email address may have a mispelled top-level domain; return a suggestion
-			$email = $emailParts->mailbox."@".$emailParts->label.".".$closestTld;
+			$address = $emailParts->mailbox."@".$emailParts->label.".".$closestTld;
 			if (filter_var($address, FILTER_VALIDATE_EMAIL) !== false) {
 				// a suggest to far ? return $this->suggest($emailParts->mailbox."@".$emailParts->label.".".$closestTld);
 				// test with gooooogle.con. Depends if you want give minimalist correction
