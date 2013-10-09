@@ -2,7 +2,25 @@
 namespace Mailcheck;
 
 
+
 /*
+ * Mailcheck https://github.com/kcassam/mailcheck
+ * Author
+ * K (@kaweedo)
+ *
+ * License
+ * Copyright (c) 2013 Headoo
+ *
+ * Licensed under the MIT License.
+ * 
+ * v 1.1
+ * 
+ * Free api : http://headoo.com/api/mailcheck/suggest/
+ */
+
+/**
+ * php port of https://github.com/Kicksend/mailcheck
+ * 
  * Mailcheck https://github.com/Kicksend/mailcheck
  * Author
  * Derrick Ko (@derrickko)
@@ -15,35 +33,18 @@ namespace Mailcheck;
  * v 1.1
  */
 
-/*
- * Mailcheck https://github.com/kcassam/mailcheck
- * Author
- * K (@kaweedo)
- *
- * License
- * Copyright (c) 2012 Receivd, Inc.
- *
- * Licensed under the MIT License.
- *
- * v 1.1
- */
-
-
-/**
-* php port of https://github.com/Kicksend/mailcheck
-
-*/
 
 class Mailcheck   {
 
 	private $popularDomains = array("yahoo.com", "google.com", "hotmail.com", "gmail.com", "me.com", "mac.com",
       "live.com", "comcast.net", "googlemail.com", "msn.com", "hotmail.co.uk", "yahoo.co.uk",
-      "facebook.com", "verizon.net", "mail.com", "outlook.com");
-	private $popularTlds = array("co.uk", "com", "net", "org", "info", "edu", "gov", "mil");
+      "facebook.com", "verizon.net", "mail.com", "outlook.com", "orange.fr", "free.fr", "aol.com", 
+      "sfr.fr", "hotmail.fr", "live.fr", "laposte.fr", "gmx.com", "laposte.net", "neuf.fr", "edhec.com", "yahoo.fr", "wanadoo.com", "wanadoo.fr");
+	private $popularTlds = array("co.uk", "com", "net", "org", "info", "edu", "gov", "mil", "fr");
 
 	private $mistakenDomains = array("gmail.fr" => "gmail.com");
-	private $mistakenTlds = array("fr" => "com");
-
+//	private $mistakenTlds = array("fr" => "com");
+	private $mistakenTlds = array();
 	private $defaultDomain = "gmail.com";
 	private $defaultTld = "com";
 	
@@ -55,9 +56,20 @@ class Mailcheck   {
 		$this->popularTlds = $tlds;
 	}
 
+	public function getPopularDomains() {
+		return $this->popularDomains;
+	}
+
 	public function setPopularDomains($domains) {
 		$this->popularDomains = $domains;
 	}
+
+	public function addPopularDomains($domains) {
+		foreach ($domains as $domain) {
+			$this->popularDomains[] = $domain;
+		}
+	}
+
 
 	public function setMistakenDomains($domains) {
 		$this->popularDomains = $domains;
@@ -78,7 +90,8 @@ class Mailcheck   {
 	}
 
 
-	public function suggest($email) {
+	public function suggest($email)
+	{
 
 		if ($this->debug) {
 			echo PHP_EOL;
@@ -109,15 +122,10 @@ class Mailcheck   {
 			// is this too far ?? return $emailParts->mailbox."@".$this->defaultDomain;
 			return $emailParts->mailbox."@".$emailParts->label.".".$this->defaultTld;
 		}
-
-		if (isset($emailParts->tld) and (isset($this->mistakenTlds[$emailParts->tld]))) {
-			if ($this->debug) {
-				echo "case #4".PHP_EOL;
-			}
-			return $emailParts->mailbox."@".$emailParts->label.".".$this->mistakenTlds[$emailParts->tld];
-		}
-
+		
+		
 		$closestDomain = $this->findClosest($emailParts->host, $this->popularDomains);
+		
 		if ($closestDomain and $closestDomain != $emailParts->host) {
 			// The email address closely matches one of the supplied domains; return a suggestion
 			if ($this->debug) {
@@ -144,6 +152,15 @@ class Mailcheck   {
 				return $this->suggest($email);
 			}
 		}
+		
+		if (isset($emailParts->tld) and (isset($this->mistakenTlds[$emailParts->tld]))) {
+			if ($this->debug) {
+				echo "case #4".PHP_EOL;
+			}
+			return $emailParts->mailbox."@".$emailParts->label.".".$this->mistakenTlds[$emailParts->tld];
+		}
+
+		
 		if ($this->debug) {
 			echo "case #8".PHP_EOL;
 		}
@@ -152,10 +169,11 @@ class Mailcheck   {
 		
 	}
 
-	public function sanitize($email) {
+	public function sanitize($email)
+	{
 
 		$email = mb_convert_case($email, MB_CASE_LOWER, "UTF-8");
-	    $email =  filter_var($email, FILTER_SANITIZE_EMAIL);
+//	    $email =  filter_var($email, FILTER_SANITIZE_EMAIL);
 		$explodedEmail = explode("@", $email, 3);
 
 		if ($this->debug > 1) {		
@@ -174,7 +192,8 @@ class Mailcheck   {
 		return $email;
 	}
 
-	public function splitEmail($email) {
+	public function splitEmail($email)
+	{
 		// if email == test@, Notice: Unknown: Missing or invalid host name after @ (errflg=3) in Unknown on line 0
 		// if multiple @, Notice: Unknown: Unexpected characters at end of address: @om (errflg=3) in Unknown on line 0
 
@@ -195,7 +214,8 @@ class Mailcheck   {
 	}
 
 
-    private function findClosest($needle, $haystack) {
+    private function findClosest($needle, $haystack)
+    {
       $dist = null;
       $minDist = 99;
       $threshold = 3;
@@ -206,7 +226,11 @@ class Mailcheck   {
         if ($needle == $canon) {
           return $needle;
         }
-        $dist = $this->sift3Plus($needle, $canon);
+        $dist = levenshtein($needle, $canon);
+		if ($this->debug > 1) {		
+	        var_dump(array($canon, $dist));
+	    }
+        
         if ($dist < $minDist) {
           $minDist = $dist;
           $closest = $canon;
@@ -220,43 +244,57 @@ class Mailcheck   {
       }
     }
 
-	//siderite.blogspot.com/2007/04/super-fast-and-accurate-string-distance.html
-	public function sift3Plus($s1, $s2) {
-	    $s1Length = strlen($s1); 
-	    $s2Length = strlen($s2);
-	    if (empty($s1)) {
-	        return (empty($s2) ? 0 : $s2Length);
-	    }
-	    if (empty($s2)) {
-	        return $s1Length;
-	    }
-	    $c1 = $c2 = $lcs = 0;
-	
-		$maxOffset = 5;
-	
-	    while (($c1 < $s1Length) && ($c2 < $s2Length)) {
-	        if (($d = $s1{$c1}) == $s2{$c2}) {
-	            $lcs++;
-	        } else {
-	            for ($i = 1; $i < $maxOffset; $i++) {
-	                if (($c1 + $i < $s1Length) && (($d = $s1{$c1 + $i}) == $s2{$c2})) {
-	                    $c1 += $i;
-	                    break;
-	                }
-	                if (($c2 + $i < $s2Length) && (($d = $s1{$c1}) == $s2{$c2 + $i})) {
-	                    $c2 += $i;
-	                    break;
-	                }
-	            }
-	        }
-	        $c1++;
-	        $c2++;
-	    }
-	    return (($s1Length + $s2Length) / 2 - $lcs);
+   /**
+	* Not exactly closely related to Mailcheck, this function can find a bad email address in an delivery failure email body.
+	* You can call this function with 
+	* - a body or 
+	* - an imap stream and a message number.
+    */
+
+	public function searchBadAddressImapAdapter($imapStream, $msgNumber)
+	{
+		$header = imap_fetchheader($imapStream, $msgNumber, FT_UID);
+		$body = imap_body($imapStream, $msgNumber, FT_UID);
+		return $this->searchBadAddress($header, $body);
 	}
 
+	public function searchBadAddress($header, $body)
+	{
+		$address = $this->getFailedRecipientsFromHeader($header);
+		if ($address === false) {
+			$address = $this->getFailedRecipientsFromBody($body);
+		}
+		return mb_convert_case($address, MB_CASE_LOWER, "UTF-8");
+	}
 
+    public function getFailedRecipientsFromHeader($header)
+    {
+    	$needle = "X-Failed-Recipients";
+		$lines = preg_split('/\r\n|\r|\n/', $header);
+    
+		foreach ($lines as $line) {
+        	$exploded = explode(":", $line, 2);
+			if (stripos(trim($exploded[0]), $needle) !== false) {
+				return trim($exploded[1]);
+			}
+		}
+		return false;
+	}
 
+    public function getFailedRecipientsFromBody($body)
+    {
 
+		$body = imap_utf8($body);
+		$body = quoted_printable_decode($body);
+		$body = trim($body); 
+		$body = preg_replace('/\s+|[^a-zA-Z0-9-_@.\+\'"]+/',' ', $body);
+
+		$exploded = explode(' ', $body);
+		foreach ($exploded as $candidat) {
+			if (strpos($candidat, "@") !== false) {
+				return $candidat;
+			}
+		}
+		return false;
+	}
 }
-

@@ -15,6 +15,8 @@ $tests = array(
 "test@havasww.org",
 "test@havasww.com",
 "test@hotmail.fr",
+"test@25@wanadoo.fr",
+"test@bnpparisbas.com:",
 );
 
 require_once(__DIR__."/../src/Mailcheck/mailcheck.php");
