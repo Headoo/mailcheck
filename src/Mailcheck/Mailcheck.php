@@ -13,7 +13,7 @@ namespace Mailcheck;
  *
  * Licensed under the MIT License.
  * 
- * v 1.1
+ * v 1.2
  * 
  * Free api : http://headoo.com/api/mailcheck/suggest/
  */
@@ -90,16 +90,15 @@ class Mailcheck   {
 	}
 
 
-	public function suggest($email)
+	public function suggest($address)
 	{
 
 		if ($this->debug) {
 			echo PHP_EOL;
-			echo "input='".$email."'".PHP_EOL;
+			echo "input='".$address."'".PHP_EOL;
 		}
-		$email = $this->sanitize($email).PHP_EOL;
 
-		$emailParts = $this->splitEmail($email);
+		$emailParts = $this->parseEmailAddress($address);
 		if (strlen(trim($emailParts->host)) == 0) {
 			// is this too far ?? return $emailParts->mailbox."@".$this->defaultDomain;
 			if ($this->debug) {
@@ -138,18 +137,18 @@ class Mailcheck   {
 		if ($closestTld and $closestTld != $emailParts->tld) {
 			// The email address may have a mispelled top-level domain; return a suggestion
 			$email = $emailParts->mailbox."@".$emailParts->label.".".$closestTld;
-			if (filter_var($email, FILTER_VALIDATE_EMAIL) !== false) {
+			if (filter_var($address, FILTER_VALIDATE_EMAIL) !== false) {
 				// a suggest to far ? return $this->suggest($emailParts->mailbox."@".$emailParts->label.".".$closestTld);
 				// test with gooooogle.con. Depends if you want give minimalist correction
 				if ($this->debug) {
 					echo "case #6".PHP_EOL;
 				}
-				return $email;
+				return $address;
 			} else {
 				if ($this->debug) {
 					echo "case #7".PHP_EOL;
 				}
-				return $this->suggest($email);
+				return $this->suggest($address);
 			}
 		}
 		
@@ -169,50 +168,30 @@ class Mailcheck   {
 		
 	}
 
-	public function sanitize($email)
+	public function parseEmailAddress($address)
 	{
 
-		$email = mb_convert_case($email, MB_CASE_LOWER, "UTF-8");
-//	    $email =  filter_var($email, FILTER_SANITIZE_EMAIL);
-		$explodedEmail = explode("@", $email, 3);
-
-		if ($this->debug > 1) {		
-			echo "exploded";
-			var_dump($explodedEmail);
-		}
-		if (isset($explodedEmail[1])) {
-			$email = $explodedEmail[0]."@".$explodedEmail[1];
+		/* We do not use imap_rfc822_parse_adrlist because imap_rfc822_parse_adrlist sanitize email and we don't want sanitization now. 
+		 * Sanitazation will be done in suggest function
+		 */
+		$exploded = explode("@", $address, 2);
+		$parsed["mailbox"] = $exploded[0];
+		if (isset($exploded[1])) {
+			$parsed["host"] = $exploded[1];
 		} else {
-			$email = $explodedEmail[0];
+			$parsed["host"] = "";			
 		}
-		$email = trim($email,"@");
-		if ($this->debug > 0) {		
-			echo "sanitize='".$email."'".PHP_EOL;
+		
+		$exploded = explode(".", $parsed["host"], 2);		
+		$parsed["label"] = $exploded[0];
+		if (isset($exploded[1])) {
+			$parsed["tld"] = $exploded[1];
+		} else {
+			$parsed["tld"] = "";			
 		}
-		return $email;
+		$parsedObject =json_decode(json_encode($parsed));
+		return $parsedObject;
 	}
-
-	public function splitEmail($email)
-	{
-		// if email == test@, Notice: Unknown: Missing or invalid host name after @ (errflg=3) in Unknown on line 0
-		// if multiple @, Notice: Unknown: Unexpected characters at end of address: @om (errflg=3) in Unknown on line 0
-
-		$parsed = imap_rfc822_parse_adrlist($email, "");
-		$parsed = reset($parsed);
-		$exploded = explode(".", $parsed->host, 2);
-		if (isset ($exploded[1])) {
-			$parsed->tld = $exploded[1];
-		}
-		if (isset ($exploded[0])) {
-			$parsed->label = $exploded[0];
-		}
-		if ($this->debug > 1) {		
-			echo "parsed='";
-			var_dump($parsed);
-		}
-		return $parsed;
-	}
-
 
     private function findClosest($needle, $haystack)
     {
@@ -275,7 +254,11 @@ class Mailcheck   {
 		foreach ($lines as $line) {
         	$exploded = explode(":", $line, 2);
 			if (stripos(trim($exploded[0]), $needle) !== false) {
-				return trim($exploded[1]);
+				$address = preg_replace('/\s+/','', $exploded[1]);
+				if ($this->debug) {
+					echo "header strategy wins for '$address'".PHP_EOL;
+				}
+				return preg_replace('/\s+/','', $exploded[1]);
 			}
 		}
 		return false;
@@ -292,6 +275,9 @@ class Mailcheck   {
 		$exploded = explode(' ', $body);
 		foreach ($exploded as $candidat) {
 			if (strpos($candidat, "@") !== false) {
+				if ($this->debug) {
+					echo "body strategy wins".PHP_EOL;
+				}
 				return $candidat;
 			}
 		}
