@@ -1,3 +1,6 @@
 {
     "name": "kcassam/mailcheck"
+    "autoload": {
+        "psr-4": {"Mailcheck\\": "src/Mailcheck"}
+    }
 }
