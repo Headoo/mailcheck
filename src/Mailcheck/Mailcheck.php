@@ -42,7 +42,7 @@ class Mailcheck   {
       "sfr.fr", "hotmail.fr", "live.fr", "laposte.fr", "gmx.com", "laposte.net", "neuf.fr", "edhec.com", "yahoo.fr", "wanadoo.com", "wanadoo.fr", "outlook.fr");
 	private $popularTlds = array("co.uk", "com", "net", "org", "info", "edu", "gov", "mil", "fr");
 
-	private $mistakenDomains = array("gmail.fr" => "gmail.com", "yahoo.fr" => "yahoo.com", "outlook.fr" => "outlook.com", "hotmail.fr" => "hotmail.com", "9.fr" => "neuf.fr", "nordnet.fr" => "nordnet.com");
+	private $mistakenDomains = array("gmail.fr" => "gmail.com", "yahoo.fr" => "yahoo.com", "outlook.fr" => "outlook.com", "hotmail.fr" => "hotmail.com", "9.fr" => "neuf.fr", "nordnet.fr" => "nordnet.com", "hotmail" => "hotmail.com");
 //	private $mistakenTlds = array("fr" => "com");
 	private $mistakenTlds = array();
 	private $defaultDomain = "gmail.com";
@@ -283,4 +283,10 @@ class Mailcheck   {
 		}
 		return false;
 	}
+	
+
+    public function sanitize($address) {
+        return filter_var($address, FILTER_SANITIZE_EMAIL);
+    }
+
 }
