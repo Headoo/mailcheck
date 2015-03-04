@@ -98,6 +98,9 @@ class Mailcheck   {
 			echo "input='".$address."'".PHP_EOL;
 		}
 
+        $address = $this->sanitize($address);
+
+
 		$emailParts = $this->parseEmailAddress($address);
 		if (strlen(trim($emailParts->host)) == 0) {
 			// is this too far ?? return $emailParts->mailbox."@".$this->defaultDomain;
@@ -113,13 +116,13 @@ class Mailcheck   {
 
 			return $emailParts->mailbox."@".$this->mistakenDomains[$emailParts->host];
 		}
-		if (!isset($emailParts->tld)) {
+		if (!$emailParts->tld) {
 			if ($this->debug) {
 				echo "case #3".PHP_EOL;
 			}
 
 			// is this too far ?? return $emailParts->mailbox."@".$this->defaultDomain;
-			return $emailParts->mailbox."@".$emailParts->label.".".$this->defaultTld;
+			return $this->suggest($emailParts->mailbox."@".$emailParts->label.".".$this->defaultTld);
 		}
 		
 		
@@ -164,7 +167,7 @@ class Mailcheck   {
 			echo "case #8".PHP_EOL;
 		}
 
-		return false;
+		return $address;
 		
 	}
 
@@ -177,21 +180,45 @@ class Mailcheck   {
 		$exploded = explode("@", $address, 2);
 		$parsed["mailbox"] = $exploded[0];
 		if (isset($exploded[1])) {
-			$parsed["host"] = $exploded[1];
+			$parsed["host"] = idn_to_utf8($exploded[1]);
+		
+    		$exploded = explode(".", $parsed["host"], 2);		
+    		if (isset($exploded[1])) {
+        		$parsed["label"] = $exploded[0];
+    			$parsed["tld"] = $exploded[1];
+    		} else {
+                // no dot in host part, ouch…
+                $parsed["tld"] = '';
+                $suggestedHost = $this->suggestHost($parsed["host"]);
+                if ($suggestedHost !== false) {
+            		$parsed["label"] = $suggestedHost[0];
+                    $this->setdefaultTld($suggestedHost[1]);
+                } else {
+                    // no hope
+            		$parsed["label"] = $exploded[0];
+                }
+    		}
 		} else {
-			$parsed["host"] = "";			
+			$parsed["host"] = "";
 		}
 		
-		$exploded = explode(".", $parsed["host"], 2);		
-		$parsed["label"] = $exploded[0];
-		if (isset($exploded[1])) {
-			$parsed["tld"] = $exploded[1];
-		} else {
-			$parsed["tld"] = "";			
-		}
 		$parsedObject =json_decode(json_encode($parsed));
+
 		return $parsedObject;
 	}
+
+    public function suggestHost($host) {
+
+        foreach($this->popularTlds as $tld) {
+            if ($this->endsWith($tld, $host)) {
+                $explodedHost = explode($tld, $host);
+                return array($explodedHost[0], $tld);
+            }
+        }
+        return false;
+    }
+
+
 
     private function findClosest($needle, $haystack)
     {
@@ -288,5 +315,15 @@ class Mailcheck   {
     public function sanitize($address) {
         return filter_var($address, FILTER_SANITIZE_EMAIL);
     }
+
+    //stackoverflow.com/questions/834303/startswith-and-endswith-functions-in-php
+    private function endsWith($needle, $haystack) {
+        //    PHP Warning:  substr_compare(): The start position cannot exceed initial string length
+        if (strlen($needle) > strlen($haystack)) {
+            return false;
+        }
+        return (substr_compare($haystack, $needle, - strlen($needle), strlen($needle), true) === 0);
+    } 
+
 
 }
