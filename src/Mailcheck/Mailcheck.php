@@ -70,11 +70,9 @@ class Mailcheck   {
 		}
 	}
 
-
 	public function setMistakenDomains($domains) {
 		$this->popularDomains = $domains;
 	}
-
 
 	public function setdefaultDomains($domains) {
 		$this->mistakenDomains = $domains;
@@ -84,22 +82,19 @@ class Mailcheck   {
 		$this->defaultTld = $tld;
 	}
 
-
 	public function setDebug($debug) {
 		$this->debug = $debug;
 	}
 
-
 	public function suggest($address)
 	{
-
 		if ($this->debug) {
 			echo PHP_EOL;
 			echo "input='".$address."'".PHP_EOL;
 		}
 
+        $address = $this->getEmailInsideLtGt($address);
         $address = $this->sanitize($address);
-
 
 		$emailParts = $this->parseEmailAddress($address);
 		if (strlen(trim($emailParts->host)) == 0) {
@@ -124,8 +119,7 @@ class Mailcheck   {
 			// is this too far ?? return $emailParts->mailbox."@".$this->defaultDomain;
 			return $this->suggest($emailParts->mailbox."@".$emailParts->label.".".$this->defaultTld);
 		}
-		
-		
+
 		$closestDomain = $this->findClosest($emailParts->host, $this->popularDomains);
 		
 		if ($closestDomain and $closestDomain != $emailParts->host) {
@@ -162,13 +156,11 @@ class Mailcheck   {
 			return $emailParts->mailbox."@".$emailParts->label.".".$this->mistakenTlds[$emailParts->tld];
 		}
 
-		
 		if ($this->debug) {
 			echo "case #8".PHP_EOL;
 		}
 
 		return $address;
-		
 	}
 
 	public function parseEmailAddress($address)
@@ -323,7 +315,24 @@ class Mailcheck   {
             return false;
         }
         return (substr_compare($haystack, $needle, - strlen($needle), strlen($needle), true) === 0);
-    } 
+    }
 
+    /**
+     * Try to get email inside '<' and '>'
+     * Return original string if no <> found
+     * Fix for: "Admont, Cyril {PI}" <Cyril.Admont@pepsico.com>
+     *
+     * @param string $string
+     * @return string
+     */
+    private function getEmailInsideLtGt($string)
+    {
+        preg_match('#\<(.*?)\>#', $string, $match);
+
+        if (isset($match[1]))
+            return $match[1];
+
+        return $string;
+    }
 
 }
