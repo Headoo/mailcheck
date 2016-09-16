@@ -1,12 +1,12 @@
 {
-    "name": "headoo/mailcheck",
+    "name": "kcassam/mailcheck",
     "type": "symfony-bundle",
     "description": "eMail checker and suggests a right domain",
     "homepage": "https://github.com/Headoo/mailcheck",
     "keywords": ["mailcheck", "api", "bundle", "domain"],
     "authors": [
        {
-          "name": "Corentin Headoo"
+          "name": "Headoo"
        }
     ],
     "require": {
