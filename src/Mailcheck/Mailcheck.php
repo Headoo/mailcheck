@@ -1,10 +1,9 @@
 <?php
-namespace Mailcheck;
 
-
+namespace Headoo\MailCheck;
 
 /*
- * Mailcheck https://github.com/kcassam/mailcheck
+ * Mailcheck https://github.com/headoo/mailcheck
  * Author
  * K (@kaweedo)
  *
@@ -34,7 +33,7 @@ namespace Mailcheck;
  */
 
 
-class Mailcheck   {
+class MailCheck   {
 
 	private $popularDomains = array("yahoo.com", "google.com", "hotmail.com", "gmail.com", "me.com", "mac.com",
       "live.com", "comcast.net", "googlemail.com", "msn.com", "hotmail.co.uk", "yahoo.co.uk",
@@ -329,10 +328,7 @@ class Mailcheck   {
     {
         preg_match('#\<(.*?)\>#', $string, $match);
 
-        if (isset($match[1]))
-            return $match[1];
-
-        return $string;
+        return (isset($match[1])) ? $match[1] : $string;
     }
 
 }
