@@ -1,6 +1,19 @@
 {
-    "name": "kcassam/mailcheck",
+    "name": "headoo/mailcheck",
+    "type": "symfony-bundle",
+    "description": "eMail checker and suggests a right domain",
+    "homepage": "https://github.com/Headoo/mailcheck",
+    "keywords": ["mailcheck", "api", "bundle", "domain"],
+    "authors": [
+       {
+          "name": "Corentin Headoo"
+       }
+    ],
+    "require": {
+          "php": ">=5.4",
+          "symfony/framework-bundle": "2.7.*"
+    },
     "autoload": {
-        "psr-4": {"Mailcheck\\": "src/Mailcheck"}
+        "psr-4": {"Headoo\\MailCheck\\": "src/Mailcheck"}
     }
 }
