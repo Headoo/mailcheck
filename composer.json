@@ -14,6 +14,6 @@
           "symfony/framework-bundle": "2.7.*"
     },
     "autoload": {
-        "psr-4": {"Headoo\\MailCheck\\": "src/Mailcheck"}
+        "psr-4": {"kcassam\\MailCheck\\": "src/Mailcheck"}
     }
 }
