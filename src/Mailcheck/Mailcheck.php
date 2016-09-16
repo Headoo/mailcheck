@@ -1,6 +1,6 @@
 <?php
 
-namespace Headoo\MailCheck;
+namespace kcassam\MailCheck;
 
 /*
  * Mailcheck https://github.com/headoo/mailcheck
