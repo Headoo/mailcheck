@@ -1,6 +1,5 @@
 <?php
-
-namespace kcassam\MailCheck;
+namespace Mailcheck;
 
 /*
  * Mailcheck https://github.com/headoo/mailcheck
@@ -33,7 +32,7 @@ namespace kcassam\MailCheck;
  */
 
 
-class MailCheck   {
+class Mailcheck   {
 
 	private $popularDomains = array("yahoo.com", "google.com", "hotmail.com", "gmail.com", "me.com", "mac.com",
       "live.com", "comcast.net", "googlemail.com", "msn.com", "hotmail.co.uk", "yahoo.co.uk",

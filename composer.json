@@ -13,6 +13,6 @@
           "php": ">=5.4"
     },
     "autoload": {
-        "psr-4": {"kcassam\\MailCheck\\": "src/Mailcheck"}
+        "psr-4": {"Mailcheck\\": "src/Mailcheck"}
     }
 }
