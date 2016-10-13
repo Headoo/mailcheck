@@ -4,8 +4,7 @@
     "description": "eMail checker and suggests a right domain",
     "homepage": "https://github.com/Headoo/mailcheck",
     "keywords": ["mailcheck", "api", "bundle", "domain"],
-    "authors": [
-       {
+    "authors": [{
           "name": "Headoo"
        }
     ],
