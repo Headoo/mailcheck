@@ -33,8 +33,7 @@ class MailcheckTest extends TestCase
 			'toto@gmaiĺcom' => 'toto@gmail.com',
 			'toto@xn--gmaicom-whb' => 'toto@gmail.com',
 			];
-		
-		
+
 		$mailcheck = new Mailcheck\Mailcheck();
 		$mailcheck->setDebug(0);
 		
