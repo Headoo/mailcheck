@@ -9,9 +9,14 @@ Example : [test@hotnail.cmo](http://headoo.com/api/mailcheck/suggest/test@hotnai
 
 Installation : 
 
-     $  git clone https://github.com/Headoo/mailcheck.git
-     $  composer update
+    $  git clone https://github.com/Headoo/mailcheck.git
+    $  composer update
 
 Test : 
 
-     $ ./vendor/phpunit/phpunit/phpunit tests
+    $ ./vendor/phpunit/phpunit/phpunit tests
+     
+Upload code coverage
+ 
+    $ php vendor/bin/phpunit tests --coverage-clover=coverage.xml
+    $ bash <(curl -s https://codecov.io/bash)
