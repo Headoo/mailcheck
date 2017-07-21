@@ -11,3 +11,6 @@ Installation :
 
      $  git clone https://github.com/Headoo/mailcheck.git
      $  composer update
+
+Test : 
+     $ ./vendor/phpunit/phpunit/phpunit tests
