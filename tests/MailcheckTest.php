@@ -32,6 +32,7 @@ class MailcheckTest extends TestCase
 			'toto@gmaicom' => 'toto@gmail.com',
 			'toto@gmaiĺcom' => 'toto@gmail.com',
 			'toto@xn--gmaicom-whb' => 'toto@gmail.com',
+            'toto@hotmailcom' => 'toto@hotmail.com'
 			];
 
 		$mailcheck = new Mailcheck\Mailcheck();
