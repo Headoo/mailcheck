@@ -10,15 +10,15 @@ namespace Mailcheck;
  * Copyright (c) 2013 Headoo
  *
  * Licensed under the MIT License.
- * 
+ *
  * v 1.2
- * 
+ *
  * Free api : http://headoo.com/api/mailcheck/suggest/
  */
 
 /**
  * php port of https://github.com/Kicksend/mailcheck
- * 
+ *
  * Mailcheck https://github.com/Kicksend/mailcheck
  * Author
  * Derrick Ko (@derrickko)
@@ -95,7 +95,7 @@ class Mailcheck
         foreach ($domains as $domain) {
             $this->popularDomains[] = $domain;
         }
-    
+
         return $this;
     }
 
@@ -106,7 +106,7 @@ class Mailcheck
     public function setMistakenDomains($domains)
     {
         $this->popularDomains = $domains;
-    
+
         return $this;
     }
 
@@ -185,7 +185,7 @@ class Mailcheck
         }
 
         $closestDomain = $this->findClosest($emailParts->host, $this->popularDomains);
-        
+
         if ($closestDomain and $closestDomain != $emailParts->host) {
             // The email address closely matches one of the supplied domains; return a suggestion
             if ($this->debug) {
@@ -216,7 +216,7 @@ class Mailcheck
                 return $this->suggest($address);
             }
         }
-        
+
         if (isset($emailParts->tld) and (isset($this->mistakenTlds[$emailParts->tld]))) {
             if ($this->debug) {
                 echo "case #4" . PHP_EOL;
@@ -238,7 +238,7 @@ class Mailcheck
      */
     public function parseEmailAddress($address)
     {
-        /* We do not use imap_rfc822_parse_adrlist because imap_rfc822_parse_adrlist sanitize email and we don't want sanitization now. 
+        /* We do not use imap_rfc822_parse_adrlist because imap_rfc822_parse_adrlist sanitize email and we don't want sanitization now.
          * Sanitazation will be done in suggest function
          */
         $exploded = explode("@", $address, 2);
@@ -246,9 +246,9 @@ class Mailcheck
         if (!isset($exploded[1])) {
             $parsed["host"] = "";
         } else {
-            $parsed["host"] = idn_to_utf8($exploded[1]);
-        
-            $exploded = explode(".", $parsed["host"], 2);        
+            $parsed["host"] = idn_to_utf8($exploded[1], 0, INTL_IDNA_VARIANT_UTS46);
+
+            $exploded = explode(".", $parsed["host"], 2);
             if (isset($exploded[1])) {
                 $parsed["label"] = $exploded[0];
                 $parsed["tld"] = $exploded[1];
@@ -325,8 +325,8 @@ class Mailcheck
 
    /**
     * Not exactly closely related to Mailcheck, this function can find a bad email address in an delivery failure email body.
-    * You can call this function with 
-    * - a body or 
+    * You can call this function with
+    * - a body or
     * - an imap stream and a message number.
     *
     * @param $imapStream
@@ -364,7 +364,7 @@ class Mailcheck
     {
         $needle = "X-Failed-Recipients";
         $lines = preg_split('/\r\n|\r|\n/', $header);
-    
+
         foreach ($lines as $line) {
             $exploded = explode(":", $line, 2);
             if (stripos(trim($exploded[0]), $needle) !== false) {
@@ -388,7 +388,7 @@ class Mailcheck
     {
         $body = imap_utf8($body);
         $body = quoted_printable_decode($body);
-        $body = trim($body); 
+        $body = trim($body);
         $body = preg_replace('/\s+|[^a-zA-Z0-9-_@.\+\'"]+/', ' ', $body);
 
         $exploded = explode(' ', $body);

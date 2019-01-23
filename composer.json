@@ -5,16 +5,20 @@
     "homepage": "https://github.com/Headoo/mailcheck",
     "keywords": ["mailcheck", "api", "bundle", "domain"],
     "authors": [{
-          "name": "Headoo"
+        "name": "Headoo"
        }
     ],
     "require": {
-          "php": ">=7.1"
+        "php": ">=7.1",
+        "ext-intl": "*"
     },
     "require-dev": {
-        "phpunit/phpunit": "~6.2"
+        "phpunit/phpunit": "^7.0"
     },
     "autoload": {
         "psr-4": {"Mailcheck\\": "src/Mailcheck"}
+    },
+    "autoload-dev": {
+        "psr-4": {"Mailcheck\\Tests\\": "tests"}
     }
 }
